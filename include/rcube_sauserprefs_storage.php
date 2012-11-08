@@ -141,8 +141,6 @@ class rcube_sauserprefs_storage
 				}
 			}
 			elseif (array_key_exists($preference, $cur_prefs) && $value != $cur_prefs[$preference]) {
-				$result = false;
-
 				$this->db->query(
 					"UPDATE ". $this->table_name.
 					" SET ". $this->value_field ." = ?".
@@ -152,12 +150,7 @@ class rcube_sauserprefs_storage
 					$this->sa_user,
 					sauserprefs::map_pref_name($preference));
 
-				$result = $this->db->affected_rows();
-
-				if (!$result) {
-					rcube::write_log('errors', 'sauserprefs error: cannot update "' . sauserprefs::map_pref_name($preference) . '" = "' .  $value . '" for ' . $this->sa_user);
-					break;
-				}
+				$result = true;
 			}
 			elseif (!array_key_exists($preference, $cur_prefs) && $value != $global_prefs[$preference]) {
 				$result = false;
@@ -251,7 +244,10 @@ class rcube_sauserprefs_storage
 	private function _db_connect($mode)
 	{
 		if (!$this->db)
+		{
 			$this->db = rcube_db::factory($this->db_dsnw, $this->db_dsnr, $this->db_persistent);
+			$this->db->set_debug((bool)rcmail::get_instance()->config->get('sql_debug'));
+		}
 
 		$this->db->db_connect($mode);
 
