@@ -97,7 +97,7 @@ class rcube_sauserprefs_storage
 						$result = $this->db->affected_rows();
 
 						if (!$result) {
-							rcube::write_log('errors', 'sauserprefs error: cannot delete "' . sauserprefs::map_pref_name($prefs[$idx]) . '" = "' .  $vals[$idx] . '" for ' . $this->sa_user);
+							write_log('errors', 'sauserprefs error: cannot delete "' . sauserprefs::map_pref_name($prefs[$idx]) . '" = "' .  $vals[$idx] . '" for ' . $this->sa_user);
 							break;
 						}
 					}
@@ -117,7 +117,7 @@ class rcube_sauserprefs_storage
 						$result = $this->db->affected_rows();
 
 						if (!$result) {
-							rcube::write_log('errors', 'sauserprefs error: cannot insert "' . sauserprefs::map_pref_name($prefs[$idx]) . '" = "' .  $vals[$idx] . '" for ' . $this->sa_user);
+							write_log('errors', 'sauserprefs error: cannot insert "' . sauserprefs::map_pref_name($prefs[$idx]) . '" = "' .  $vals[$idx] . '" for ' . $this->sa_user);
 							break;
 						}
 					}
@@ -136,11 +136,13 @@ class rcube_sauserprefs_storage
 				$result = $this->db->affected_rows();
 
 				if (!$result) {
-					rcube::write_log('errors', 'sauserprefs error: cannot delete "' . sauserprefs::map_pref_name($preference) . '" for "' . $this->sa_user);
+					write_log('errors', 'sauserprefs error: cannot delete "' . sauserprefs::map_pref_name($preference) . '" for "' . $this->sa_user);
 					break;
 				}
 			}
 			elseif (array_key_exists($preference, $cur_prefs) && $value != $cur_prefs[$preference]) {
+				$result = false;
+
 				$this->db->query(
 					"UPDATE ". $this->table_name.
 					" SET ". $this->value_field ." = ?".
@@ -168,7 +170,7 @@ class rcube_sauserprefs_storage
 				$result = $this->db->affected_rows();
 
 				if (!$result) {
-					rcube::write_log('errors', 'sauserprefs error: cannot insert "' . sauserprefs::map_pref_name($preference) . '" = "' .  $value . '" for ' . $this->sa_user);
+					write_log('errors', 'sauserprefs error: cannot insert "' . sauserprefs::map_pref_name($preference) . '" = "' .  $value . '" for ' . $this->sa_user);
 					break;
 				}
 			}
@@ -193,7 +195,7 @@ class rcube_sauserprefs_storage
 							sauserprefs::map_pref_name('whitelist_from'),
 							$email);
 
-			if (!$this->db->fetch_array($sql_result))
+			if ($this->db->num_rows($sql_result) == 0)
 				$this->db->query(
 					"INSERT INTO ". $this->table_name.
 					" (". $this->username_field.
@@ -245,7 +247,7 @@ class rcube_sauserprefs_storage
 	{
 		if (!$this->db)
 		{
-			$this->db = rcube_db::factory($this->db_dsnw, $this->db_dsnr, $this->db_persistent);
+			$this->db = new rcube_mdb2($this->db_dsnw, $this->db_dsnr, $this->db_persistent);
 			$this->db->set_debug((bool)rcmail::get_instance()->config->get('sql_debug'));
 		}
 
